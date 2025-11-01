@@ -5,12 +5,16 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import NavHeader from '@/components/NavHeader';
+import TreeVisualization from '@/components/TreeVisualization';
 
 export default function TreePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ hobbies: 0, activities: 0, reflections: 0, moments: 0 });
   const [profile, setProfile] = useState<any>(null);
+  const [hobbiesData, setHobbiesData] = useState<any[]>([]);
+  const [activitiesData, setActivitiesData] = useState<any[]>([]);
+  const [reflectionsData, setReflectionsData] = useState<any[]>([]);
+  const [momentsData, setMomentsData] = useState<any[]>([]);
 
   useEffect(() => {
     loadTreeData();
@@ -26,26 +30,30 @@ export default function TreePage() {
 
       const [profileData, hobbies, activities, reflections, moments] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('hobbies').select('id').eq('user_id', user.id),
-        supabase.from('activity_logs').select('id').eq('user_id', user.id),
-        supabase.from('reflections').select('id').eq('user_id', user.id),
-        supabase.from('moments').select('id').eq('user_id', user.id),
+        supabase.from('hobbies').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('activity_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('reflections').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('moments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       ]);
 
       setProfile(profileData.data);
-
-      setStats({
-        hobbies: hobbies.data?.length || 0,
-        activities: activities.data?.length || 0,
-        reflections: reflections.data?.length || 0,
-        moments: moments.data?.length || 0,
-      });
+      setHobbiesData(hobbies.data || []);
+      setActivitiesData(activities.data || []);
+      setReflectionsData(reflections.data || []);
+      setMomentsData(moments.data || []);
     } catch (error) {
       console.error('Failed to load tree data:', error);
     } finally {
       setLoading(false);
     }
   }
+
+  const stats = {
+    hobbies: hobbiesData.length,
+    activities: activitiesData.length,
+    reflections: reflectionsData.length,
+    moments: momentsData.length,
+  };
 
   if (loading) {
     return (
@@ -61,14 +69,7 @@ export default function TreePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
       <NavHeader userName={profile?.display_name} />
-      <div className="max-w-6xl mx-auto py-12 px-4">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Dashboard
-        </button>
+      <div className="max-w-6xl mx-auto py-6 px-4">
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
@@ -101,16 +102,19 @@ export default function TreePage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-b from-green-100 to-green-50 rounded-xl p-12 text-center">
-            <div className="text-8xl mb-4">🌳</div>
+          <TreeVisualization
+            hobbies={hobbiesData}
+            activities={activitiesData}
+            reflections={reflectionsData}
+            moments={momentsData}
+          />
+
+          <div className="mt-8 text-center">
             <p className="text-xl font-semibold text-gray-800 mb-2">
               Your tree is growing beautifully!
             </p>
             <p className="text-gray-600">
               Total Growth: {stats.hobbies + stats.activities + stats.reflections + stats.moments} moments
-            </p>
-            <p className="text-sm text-gray-500 mt-4">
-              Interactive D3.js visualization coming soon! 🎨
             </p>
           </div>
         </div>

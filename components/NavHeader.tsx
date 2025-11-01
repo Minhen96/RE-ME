@@ -17,10 +17,11 @@ export default function NavHeader({ userName }: NavHeaderProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const navLinks = [
-    { name: 'Dashboard', path: '/dashboard', emoji: '🏠' },
-    { name: 'Reflection', path: '/reflection', emoji: '🌙' },
+    { name: 'Dashboard', path: '/', emoji: '🏠' },
+    { name: 'Hobbies', path: '/hobbies', emoji: '🎨' },
     { name: 'Moments', path: '/moments', emoji: '❤️' },
     { name: 'Life Tree', path: '/tree', emoji: '🌳' },
+    { name: 'Profile', path: '/profile', emoji: '👤' },
   ];
 
   const handleLogout = async () => {
@@ -36,7 +37,7 @@ export default function NavHeader({ userName }: NavHeaderProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/')}
             className="flex items-center gap-2 cursor-pointer group"
           >
             <Sprout className="w-8 h-8 text-primary-600 group-hover:scale-110 transition-transform" />

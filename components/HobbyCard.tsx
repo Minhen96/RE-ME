@@ -10,10 +10,12 @@ interface HobbyCardProps {
 }
 
 export default function HobbyCard({ hobby, onClick }: HobbyCardProps) {
-  const progress = hobby.meta.level_thresholds?.[hobby.level]
-    ? (hobby.exp / hobby.meta.level_thresholds[hobby.level]) * 100
-    : 0;
+  const progress = `${Math.min(
+                            (hobby.exp / (hobby.meta?.level_thresholds?.[hobby.level] || 100)) * 100,
+                            100
+                          )}%`;
 
+    console.log('HobbyCard render:', hobby.name, 'Progress:', progress);
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -54,7 +56,7 @@ export default function HobbyCard({ hobby, onClick }: HobbyCardProps) {
           <motion.div
             className="bg-gradient-to-r from-primary-400 to-primary-600 h-full rounded-full"
             initial={{ width: 0 }}
-            animate={{ width: `${Math.min(progress, 100)}%` }}
+            animate={{ width: progress }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           />
         </div>

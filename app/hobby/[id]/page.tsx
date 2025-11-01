@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Plus, Sparkles, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
+import { getActivityImageUrl } from '@/lib/storageHelpers';
 import AddActivityModal from '@/components/AddActivityModal';
 import NavHeader from '@/components/NavHeader';
 
@@ -81,31 +82,26 @@ export default function HobbyDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Hobby not found</p>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg"
-          >
-            Back to Dashboard
-          </button>
         </div>
       </div>
     );
   }
 
-  const progress = hobby.meta?.level_thresholds?.[hobby.level]
-    ? (hobby.exp / hobby.meta.level_thresholds[hobby.level]) * 100
-    : 0;
+  const progress = `${Math.min(
+                            (hobby.exp / (hobby.meta?.level_thresholds?.[hobby.level] || 100)) * 100,
+                            100
+                          )}%`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       <NavHeader userName={profile?.display_name} />
       <div className="max-w-4xl mx-auto py-12 px-4">
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.push('/hobbies')}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
-          Back to Dashboard
+          Back to Hobbies
         </button>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
@@ -137,7 +133,7 @@ export default function HobbyDetailPage() {
               <motion.div
                 className="bg-gradient-to-r from-primary-400 to-primary-600 h-full rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
+                animate={{ width: progress }}
                 transition={{ duration: 1, ease: 'easeOut' }}
               />
             </div>
@@ -181,37 +177,69 @@ export default function HobbyDetailPage() {
               className="bg-white rounded-lg shadow p-6 border-l-4 border-primary-400"
             >
               <div className="flex items-start justify-between mb-3">
-                <span className="text-sm text-gray-600">
-                  {new Date(activity.created_at).toLocaleDateString()}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-600">
+                    {new Date(activity.created_at).toLocaleDateString()}
+                  </span>
+                  {activity.emotion && (
+                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                      {activity.emotion}
+                    </span>
+                  )}
+                  {activity.sentiment_score !== null && activity.sentiment_score !== undefined && (
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      activity.sentiment_score >= 0.3 ? 'bg-green-100 text-green-700' :
+                      activity.sentiment_score <= -0.3 ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {activity.sentiment_score > 0 ? '😊' : activity.sentiment_score < 0 ? '😔' : '😐'}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-1 text-primary-600 font-semibold">
                   <Sparkles className="w-4 h-4" />
                   <span>+{activity.exp_gained} XP</span>
                 </div>
               </div>
 
-              {activity.text && <p className="text-gray-800 mb-3">{activity.text}</p>}
+              <div className="flex gap-3">
+                {activity.image_path && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={getActivityImageUrl(activity.image_path) || ''}
+                      alt="Activity"
+                      className="w-20 h-20 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="flex-1">
+                  {activity.text && <p className="text-gray-800 mb-3">{activity.text}</p>}
 
-              {activity.ai_summary && (
-                <div className="bg-primary-50 rounded p-3 mb-3">
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">AI Summary:</span> {activity.ai_summary}
-                  </p>
-                </div>
-              )}
+                  {activity.ai_summary && (
+                    <div className="bg-primary-50 rounded p-3 mb-3">
+                      <p className="text-sm text-gray-700">
+                        <span className="font-medium">Summary:</span> {activity.ai_summary}
+                      </p>
+                    </div>
+                  )}
 
-              {activity.ai_skills && activity.ai_skills.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {activity.ai_skills.map((skill, idx) => (
-                    <span
-                      key={idx}
-                      className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {activity.ai_skills && activity.ai_skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activity.ai_skills.map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </motion.div>
           ))}
 

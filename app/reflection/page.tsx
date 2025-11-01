@@ -7,10 +7,12 @@ import { Moon, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { analyzeReflection } from '@/lib/api';
 import NavHeader from '@/components/NavHeader';
+import EmotionSlider from '@/components/EmotionSlider';
 
 export default function ReflectionPage() {
   const router = useRouter();
   const [text, setText] = useState('');
+  const [emotion, setEmotion] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [profile, setProfile] = useState<any>(null);
@@ -43,9 +45,14 @@ export default function ReflectionPage() {
         return;
       }
 
-      const response = await analyzeReflection({ userId: user.id, text });
+      const response = await analyzeReflection({
+        userId: user.id,
+        text,
+        manualEmotion: emotion,
+      });
       setResult({ emotion: response.emotion, summary: response.ai_summary });
       setText('');
+      setEmotion(null);
       setTimeout(() => {
         setResult(null);
       }, 5000);
@@ -60,14 +67,7 @@ export default function ReflectionPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <NavHeader userName={profile?.display_name} />
-      <div className="max-w-2xl mx-auto py-12 px-4">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Dashboard
-        </button>
+      <div className="max-w-2xl mx-auto py-6 px-4">
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-6 space-y-4">
           <div className="flex items-center gap-3 mb-4">
@@ -86,6 +86,12 @@ export default function ReflectionPage() {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
             placeholder="What's on your mind tonight? Share your thoughts, feelings, and what you learned today..."
             required
+          />
+
+          <EmotionSlider
+            value={emotion}
+            onChange={setEmotion}
+            defaultAutoAnalyze={true}
           />
 
           <button

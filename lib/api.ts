@@ -20,6 +20,7 @@ export async function analyzeActivity(params: {
   hobbyId: string;
   text: string;
   imagePath?: string;
+  manualEmotion?: number | null;
 }): Promise<AnalyzeActivityResponse> {
   const response = await fetch(`${API_BASE_URL}/api/analyze-activity`, {
     method: 'POST',
@@ -62,6 +63,7 @@ export async function createHobby(params: {
 export async function analyzeReflection(params: {
   userId: string;
   text: string;
+  manualEmotion?: number | null;
 }): Promise<AnalyzeReflectionResponse> {
   const response = await fetch(`${API_BASE_URL}/api/analyze-reflection`, {
     method: 'POST',
@@ -125,12 +127,36 @@ export async function uploadImage(
   return data.path;
 }
 
+/**
+ * Create a new happy moment with optional emotion
+ */
+export async function createMoment(params: {
+  userId: string;
+  text: string;
+  imagePath?: string;
+  manualEmotion?: number | null;
+}): Promise<{ emotion: string; sentiment_score: number; moment_id: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/create-moment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create moment');
+  }
+
+  return response.json();
+}
+
 export const api = {
   analyzeActivity,
   createHobby,
   analyzeReflection,
   getRecommendations,
   uploadImage,
+  createMoment,
 };
 
 export default api;

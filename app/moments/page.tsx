@@ -5,13 +5,17 @@ import { useRouter } from 'next/navigation';
 import { Heart, ArrowLeft, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
+import { getMomentImageUrl } from '@/lib/storageHelpers';
 import NavHeader from '@/components/NavHeader';
+import AddMomentModal from '@/components/AddMomentModal';
 
 export default function MomentsPage() {
   const router = useRouter();
   const [moments, setMoments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const [userId, setUserId] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     loadMoments();
@@ -32,6 +36,7 @@ export default function MomentsPage() {
         .single();
 
       setProfile(profileData);
+      setUserId(user.id);
 
       const { data, error } = await supabase
         .from('moments')
@@ -59,21 +64,16 @@ export default function MomentsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50">
       <NavHeader userName={profile?.display_name} />
-      <div className="max-w-6xl mx-auto py-12 px-4">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Dashboard
-        </button>
-
+      <div className="max-w-6xl mx-auto py-6 px-4">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Heart className="w-8 h-8 text-red-500" />
             <h1 className="text-3xl font-bold text-gray-900">Happy Moments</h1>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+          >
             <Plus className="w-5 h-5" />
             Add Moment
           </button>
@@ -97,9 +97,20 @@ export default function MomentsPage() {
               >
                 {moment.image_path ? (
                   <img
-                    src={moment.image_path}
+                    src={getMomentImageUrl(moment.image_path) || ''}
                     alt={moment.text || 'Happy moment'}
                     className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-full h-48 bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center';
+                        fallback.innerHTML = '<svg class="w-12 h-12 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>';
+                        parent.insertBefore(fallback, e.currentTarget);
+                      }
+                    }}
                   />
                 ) : (
                   <div className="w-full h-48 bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
@@ -116,6 +127,13 @@ export default function MomentsPage() {
             ))}
           </div>
         )}
+
+        <AddMomentModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          userId={userId}
+          onSuccess={loadMoments}
+        />
       </div>
     </div>
   );
