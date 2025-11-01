@@ -6,7 +6,10 @@
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
       "Bash(timeout /t 5 /nobreak)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(cat:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

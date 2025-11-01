@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, ArrowLeft, Plus } from 'lucide-react';
+import { Heart, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { getMomentImageUrl } from '@/lib/storageHelpers';
@@ -11,17 +11,20 @@ import AddMomentModal from '@/components/AddMomentModal';
 
 export default function MomentsPage() {
   const router = useRouter();
-  const [moments, setMoments] = useState([]);
+  const [moments, setMoments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [userId, setUserId] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
-    loadMoments();
+    (async () => {
+      await loadMoments(); // async wrapper
+    })();
   }, []);
 
   async function loadMoments() {
+    setLoading(true); // show loader
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -49,14 +52,22 @@ export default function MomentsPage() {
     } catch (error) {
       console.error('Failed to load moments:', error);
     } finally {
-      setLoading(false);
+      setLoading(false); // hide loader
     }
   }
 
+  // Async Loading Component
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading your moments...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-white to-red-50">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          className="w-16 h-16 text-red-400"
+        >
+          <Heart className="w-full h-full" />
+        </motion.div>
+        <p className="text-gray-600 mt-4 text-lg">Loading your happy moments...</p>
       </div>
     );
   }
@@ -70,13 +81,14 @@ export default function MomentsPage() {
             <Heart className="w-8 h-8 text-red-500" />
             <h1 className="text-3xl font-bold text-gray-900">Happy Moments</h1>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            Add Moment
-          </button>
+<button
+  onClick={() => setShowAddModal(true)}
+  // The 'className' below defines the entire visual design of the button.
+  className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+>
+  <Plus className="w-5 h-5" /> {/* Icon: A 'Plus' icon, typically from an icon library */}
+  Add Moment
+</button>
         </div>
 
         {moments.length === 0 ? (
@@ -101,7 +113,6 @@ export default function MomentsPage() {
                     alt={moment.text || 'Happy moment'}
                     className="w-full h-48 object-cover"
                     onError={(e) => {
-                      // Fallback if image fails to load
                       e.currentTarget.style.display = 'none';
                       const parent = e.currentTarget.parentElement;
                       if (parent) {

@@ -71,12 +71,17 @@ export interface UserMemory {
 // API Response Types
 
 export interface AnalyzeActivityResponse {
-  summary: string;
-  skills: string[];
-  exp_gained: number;
-  new_level: number;
-  total_exp: number;
+  summary?: string;
+  skills?: string[];
+  exp_gained?: number;
+  new_level?: number;
+  total_exp?: number;
   suggested_next?: string[];
+  should_split?: boolean;
+  activities?: string[];
+  confidence?: number;
+  split?: boolean;
+  total_exp_gained?: number;
 }
 
 export interface CreateHobbyResponse {

@@ -4,3 +4,7 @@ dist/
 out/
 build/
 .env
+.env.local
+CLAUDE.md
+TECHNICAL.md
+PRESENTATION.md

@@ -55,7 +55,8 @@ export default function OnboardingPage() {
       }
     }
 
-    router.push('/dashboard');
+    // Redirect to home page after successful onboarding
+    router.push('/');
   };
 
   return (

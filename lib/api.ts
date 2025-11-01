@@ -21,6 +21,7 @@ export async function analyzeActivity(params: {
   text: string;
   imagePath?: string;
   manualEmotion?: number | null;
+  splitActivities?: string[];
 }): Promise<AnalyzeActivityResponse> {
   const response = await fetch(`${API_BASE_URL}/api/analyze-activity`, {
     method: 'POST',
@@ -42,6 +43,7 @@ export async function analyzeActivity(params: {
 export async function createHobby(params: {
   userId: string;
   hobbyName: string;
+  experience?: string;
 }): Promise<CreateHobbyResponse> {
   const response = await fetch(`${API_BASE_URL}/api/create-hobby`, {
     method: 'POST',

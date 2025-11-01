@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, User, LogOut, Sprout } from 'lucide-react';
+import { Menu, X, User, Sprout } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/lib/supabaseClient';
 
 interface NavHeaderProps {
   userName?: string;
@@ -13,21 +12,16 @@ interface NavHeaderProps {
 export default function NavHeader({ userName }: NavHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
+  // Navigation links (Profile removed)
   const navLinks = [
     { name: 'Dashboard', path: '/', emoji: '🏠' },
     { name: 'Hobbies', path: '/hobbies', emoji: '🎨' },
     { name: 'Moments', path: '/moments', emoji: '❤️' },
     { name: 'Life Tree', path: '/tree', emoji: '🌳' },
-    { name: 'Profile', path: '/profile', emoji: '👤' },
+    { name: 'Soulmate', path: '/soulmate', emoji: '💕' },
   ];
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/auth/login');
-  };
 
   const isActive = (path: string) => pathname === path;
 
@@ -45,7 +39,7 @@ export default function NavHeader({ userName }: NavHeaderProps) {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex flex-1 justify-center items-center gap-2">
             {navLinks.map((link) => (
               <button
                 key={link.path}
@@ -62,44 +56,15 @@ export default function NavHeader({ userName }: NavHeaderProps) {
             ))}
           </div>
 
-          {/* User Menu */}
-          <div className="hidden md:block relative">
+          {/* Profile Button - Desktop */}
+          <div className="hidden md:flex">
             <button
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              onClick={() => router.push('/profile')}
+              className="px-5 py-2 rounded-full bg-gradient-to-r from-primary-300 to-primary-500 text-white text-sm font-semibold flex items-center gap-2 shadow-md hover:scale-105 hover:shadow-lg transition-transform duration-200"
             >
-              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm font-medium text-gray-700">
-                {userName || 'User'}
-              </span>
+              <User className="w-5 h-5" />
+              Profile
             </button>
-
-            <AnimatePresence>
-              {showUserMenu && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowUserMenu(false)}
-                  />
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20"
-                  >
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
           </div>
 
           {/* Mobile Menu Button */}
@@ -107,11 +72,7 @@ export default function NavHeader({ userName }: NavHeaderProps) {
             onClick={() => setShowMobileMenu(!showMobileMenu)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100"
           >
-            {showMobileMenu ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
@@ -142,21 +103,17 @@ export default function NavHeader({ userName }: NavHeaderProps) {
                 </button>
               ))}
 
-              <div className="border-t border-gray-200 pt-2 mt-2">
-                <div className="px-4 py-2 text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  {userName || 'User'}
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
-              </div>
+              {/* Profile Button - Mobile */}
+              <button
+                onClick={() => {
+                  router.push('/profile');
+                  setShowMobileMenu(false);
+                }}
+                className="w-full px-5 py-2 rounded-full bg-gradient-to-r from-primary-300 to-primary-500 text-white text-sm font-semibold flex items-center gap-2 justify-center shadow-md hover:scale-105 hover:shadow-lg transition-transform duration-200"
+              >
+                <User className="w-5 h-5" />
+                Profile
+              </button>
             </motion.div>
           )}
         </AnimatePresence>

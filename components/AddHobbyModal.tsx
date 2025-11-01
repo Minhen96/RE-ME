@@ -19,6 +19,8 @@ export default function AddHobbyModal({
   onSuccess,
 }: AddHobbyModalProps) {
   const [hobbyName, setHobbyName] = useState('');
+  const [isFirstTimer, setIsFirstTimer] = useState(true);
+  const [experience, setExperience] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -33,6 +35,7 @@ export default function AddHobbyModal({
       await createHobby({
         userId,
         hobbyName: hobbyName.trim(),
+        experience: isFirstTimer ? undefined : experience.trim(),
       });
 
       setShowSuccess(true);
@@ -40,6 +43,8 @@ export default function AddHobbyModal({
       setTimeout(() => {
         setShowSuccess(false);
         setHobbyName('');
+        setIsFirstTimer(true);
+        setExperience('');
         onSuccess();
         onClose();
       }, 2000);
@@ -54,6 +59,8 @@ export default function AddHobbyModal({
   const handleClose = () => {
     if (!isSubmitting) {
       setHobbyName('');
+      setIsFirstTimer(true);
+      setExperience('');
       setShowSuccess(false);
       onClose();
     }
@@ -94,20 +101,58 @@ export default function AddHobbyModal({
                   What new hobby would you like to track?
                 </p>
 
-                <form onSubmit={handleSubmit}>
-                  <input
-                    type="text"
-                    value={hobbyName}
-                    onChange={(e) => setHobbyName(e.target.value)}
-                    placeholder="e.g., Photography, Guitar, Cooking..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-2"
-                    disabled={isSubmitting}
-                    required
-                  />
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <input
+                      type="text"
+                      value={hobbyName}
+                      onChange={(e) => setHobbyName(e.target.value)}
+                      placeholder="e.g., Photography, Guitar, Cooking..."
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      disabled={isSubmitting}
+                      required
+                    />
+                  </div>
 
-                  <p className="text-sm text-gray-500 mb-6">
-                    AI will automatically categorize your hobby and suggest skills to develop.
-                  </p>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      id="firstTimer"
+                      checked={isFirstTimer}
+                      onChange={(e) => setIsFirstTimer(e.target.checked)}
+                      disabled={isSubmitting}
+                      className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                    />
+                    <label htmlFor="firstTimer" className="flex-1 text-sm text-gray-700 cursor-pointer">
+                      First timer (starting from scratch)
+                    </label>
+                  </div>
+
+                  {!isFirstTimer && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2"
+                    >
+                      <label htmlFor="experience" className="block text-sm font-medium text-gray-700">
+                        Tell us about your experience:
+                      </label>
+                      <textarea
+                        id="experience"
+                        value={experience}
+                        onChange={(e) => setExperience(e.target.value)}
+                        placeholder="e.g., I've been playing guitar for 5 years, know basic chords and can play some songs..."
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                        rows={4}
+                        disabled={isSubmitting}
+                        required={!isFirstTimer}
+                      />
+                      <p className="text-xs text-gray-500">
+                        AI will analyze your experience and set your starting level accordingly.
+                      </p>
+                    </motion.div>
+                  )}
 
                   <div className="flex gap-3 justify-end">
                     <button

@@ -32,6 +32,8 @@ export default function AddActivityModal({
   const [newLevel, setNewLevel] = useState<number | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [splitProposal, setSplitProposal] = useState<{ activities: string[]; confidence: number } | null>(null);
+  const [checkingSplit, setCheckingSplit] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,7 +61,11 @@ export default function AddActivityModal({
 
     if (!activityText.trim()) return;
 
+    // If split proposal is shown, don't submit yet - wait for confirmation
+    if (splitProposal) return;
+
     setIsSubmitting(true);
+    setCheckingSplit(true);
 
     try {
       let imagePath: string | undefined = undefined;
@@ -81,6 +87,7 @@ export default function AddActivityModal({
         imagePath = fileName;
       }
 
+      // First check if activity should be split
       const result = await analyzeActivity({
         userId,
         hobbyId,
@@ -89,9 +96,93 @@ export default function AddActivityModal({
         manualEmotion: emotion,
       });
 
-      setExpGained(result.exp_gained);
-      setNewLevel(result.new_level);
+      // Check if split is proposed
+      if ('should_split' in result && result.should_split && result.activities) {
+        setCheckingSplit(false);
+        setSplitProposal({
+          activities: result.activities,
+          confidence: result.confidence || 0,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Process as single activity or split confirmed
+      if ('split' in result && result.split && result.activities) {
+        // Multiple activities were processed
+        const totalExp = result.total_exp_gained || 0;
+        setExpGained(totalExp);
+        setNewLevel(result.new_level ?? null);
+      } else {
+        // Single activity
+        setExpGained(result.exp_gained || 0);
+        setNewLevel(result.new_level ?? null);
+      }
+
       setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        setActivityText('');
+        setEmotion(null);
+        setImageFile(null);
+        setImagePreview(null);
+        setSplitProposal(null);
+        onSuccess();
+        onClose();
+      }, 2500);
+    } catch (error) {
+      console.error('Failed to log activity:', error);
+      alert('Failed to log activity. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      setCheckingSplit(false);
+    }
+  };
+
+  const handleConfirmSplit = async () => {
+    if (!splitProposal) return;
+
+    setIsSubmitting(true);
+    setCheckingSplit(false);
+
+    try {
+      let imagePath: string | undefined = undefined;
+
+      // Upload image if exists
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('activity-images')
+          .upload(fileName, imageFile);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error('Failed to upload image');
+        }
+
+        imagePath = fileName;
+      }
+
+      // Process split activities
+      const result = await analyzeActivity({
+        userId,
+        hobbyId,
+        text: activityText,
+        imagePath,
+        manualEmotion: emotion,
+        splitActivities: splitProposal.activities,
+      });
+
+      if (result.split) {
+        setExpGained(result.total_exp_gained || 0);
+        setNewLevel(result.new_level || null);
+      }
+
+      setShowSuccess(true);
+      setSplitProposal(null);
 
       setTimeout(() => {
         setShowSuccess(false);
@@ -103,20 +194,29 @@ export default function AddActivityModal({
         onClose();
       }, 2500);
     } catch (error) {
-      console.error('Failed to log activity:', error);
-      alert('Failed to log activity. Please try again.');
+      console.error('Failed to log activities:', error);
+      alert('Failed to log activities. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleRejectSplit = () => {
+    setSplitProposal(null);
+    setCheckingSplit(false);
+    setIsSubmitting(false);
+    // Continue with single activity
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+  };
+
   const handleClose = () => {
-    if (!isSubmitting) {
+    if (!isSubmitting && !checkingSplit) {
       setActivityText('');
       setEmotion(null);
       setImageFile(null);
       setImagePreview(null);
       setShowSuccess(false);
+      setSplitProposal(null);
       onClose();
     }
   };
@@ -139,13 +239,13 @@ export default function AddActivityModal({
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 z-10"
           >
-            {!showSuccess ? (
+            {!showSuccess && !splitProposal ? (
               <>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold text-gray-900">Log Activity</h2>
                   <button
                     onClick={handleClose}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || checkingSplit}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
                   >
                     <X className="w-5 h-5" />
@@ -229,13 +329,13 @@ export default function AddActivityModal({
                       </button>
                       <button
                         type="submit"
-                        disabled={isSubmitting || !activityText.trim()}
+                        disabled={isSubmitting || checkingSplit || !activityText.trim()}
                         className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {isSubmitting ? (
+                        {(isSubmitting || checkingSplit) ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Analyzing...
+                            {checkingSplit ? 'Checking...' : 'Analyzing...'}
                           </>
                         ) : (
                           <>
@@ -248,6 +348,73 @@ export default function AddActivityModal({
                   </div>
                 </form>
               </>
+            ) : splitProposal ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Split Activity?</h2>
+                  <button
+                    onClick={handleClose}
+                    disabled={isSubmitting}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <p className="text-gray-600 mb-4">
+                  We detected multiple activities in your entry. Would you like to split them into separate logs?
+                </p>
+
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Activities detected ({splitProposal.activities.length}):
+                  </p>
+                  {splitProposal.activities.map((activity, index) => (
+                    <div
+                      key={index}
+                      className="bg-white p-3 rounded border border-gray-200"
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-primary-600 font-semibold text-sm">
+                          {index + 1}.
+                        </span>
+                        <p className="text-sm text-gray-700 flex-1">{activity}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-3 justify-end pt-4">
+                  <button
+                    onClick={handleRejectSplit}
+                    disabled={isSubmitting}
+                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    Keep as One
+                  </button>
+                  <button
+                    onClick={handleConfirmSplit}
+                    disabled={isSubmitting}
+                    className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        Split & Log All
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
             ) : (
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}

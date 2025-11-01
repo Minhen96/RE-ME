@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { motion } from 'framer-motion';
-import { User, Trophy, Sparkles, TrendingUp } from 'lucide-react';
+import { User, Trophy, Sparkles, TrendingUp, LogOut } from 'lucide-react';
 import NavHeader from '@/components/NavHeader';
-import RadarChart from '@/components/charts/RadarChart';
-import SunburstChart from '@/components/charts/SunburstChart';
+import PersonalityTraitsChart from '@/components/charts/PersonalityTraitsChart';
+import ActivityPreferenceChart from '@/components/charts/ActivityPreferenceChart';
+import { analyzeUserCharacteristics, UserCharacteristics } from '@/lib/userCharacteristics';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -18,8 +19,7 @@ export default function ProfilePage() {
   const [activities, setActivities] = useState<any[]>([]);
   const [moments, setMoments] = useState<any[]>([]);
   const [reflections, setReflections] = useState<any[]>([]);
-  const [radarData, setRadarData] = useState<any[]>([]);
-  const [sunburstData, setSunburstData] = useState<any>(null);
+  const [userCharacteristics, setUserCharacteristics] = useState<UserCharacteristics | null>(null);
 
   useEffect(() => {
     loadProfile();
@@ -33,61 +33,40 @@ export default function ProfilePage() {
         return;
       }
 
-      // Load profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      setLoading(true);
+
+      const [profileRes, hobbiesRes, activitiesRes, momentsRes, reflectionsRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('hobbies').select('*').eq('user_id', user.id),
+        supabase.from('activity_logs').select('*').eq('user_id', user.id),
+        supabase.from('moments').select('*').eq('user_id', user.id),
+        supabase.from('reflections').select('*').eq('user_id', user.id),
+      ]);
+
+      const profileData = profileRes.data;
+      const hobbiesData = hobbiesRes.data || [];
+      const activitiesData = activitiesRes.data || [];
+      const momentsData = momentsRes.data || [];
+      const reflectionsData = reflectionsRes.data || [];
 
       setProfile(profileData);
+      setHobbies(hobbiesData);
+      setActivities(activitiesData);
+      setMoments(momentsData);
+      setReflections(reflectionsData);
 
-      // Load hobbies
-      const { data: hobbiesData } = await supabase
-        .from('hobbies')
-        .select('*')
-        .eq('user_id', user.id);
+      // Analyze user characteristics
+      const characteristics = analyzeUserCharacteristics(hobbiesData, activitiesData);
+      setUserCharacteristics(characteristics);
 
-      setHobbies(hobbiesData || []);
-
-      // Load activities
-      const { data: activitiesData } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .eq('user_id', user.id);
-
-      setActivities(activitiesData || []);
-
-      // Load moments
-      const { data: momentsData } = await supabase
-        .from('moments')
-        .select('*')
-        .eq('user_id', user.id);
-
-      setMoments(momentsData || []);
-
-      // Load reflections
-      const { data: reflectionsData } = await supabase
-        .from('reflections')
-        .select('*')
-        .eq('user_id', user.id);
-
-      setReflections(reflectionsData || []);
-
-      // Generate AI summary
-      const summaryRes = await fetch('/api/generate-profile-summary', {
+      fetch('/api/generate-profile-summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),
-      });
-      const summaryData = await summaryRes.json();
-      setSummary(summaryData.summary);
-
-      // Prepare radar chart data (skills from hobbies)
-      prepareRadarData(hobbiesData || []);
-
-      // Prepare sunburst data (hobby categories)
-      prepareSunburstData(hobbiesData || [], activitiesData || []);
+      })
+        .then(res => res.json())
+        .then(data => setSummary(data.summary))
+        .catch(err => console.error('Failed to load AI summary', err));
 
       setLoading(false);
     } catch (error) {
@@ -96,63 +75,13 @@ export default function ProfilePage() {
     }
   }
 
-  function prepareRadarData(hobbiesData: any[]) {
-    const skillMap: Record<string, number> = {};
-
-    hobbiesData.forEach(hobby => {
-      if (hobby.meta?.subskills) {
-        hobby.meta.subskills.forEach((skill: string) => {
-          skillMap[skill] = (skillMap[skill] || 0) + hobby.level;
-        });
-      }
-    });
-
-    const data = Object.entries(skillMap)
-      .map(([skill, value]) => ({ skill, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 8); // Top 8 skills
-
-    setRadarData(data);
-  }
-
-  function prepareSunburstData(hobbiesData: any[], activitiesData: any[]) {
-    // Group hobbies by category
-    const categories: Record<string, any[]> = {};
-
-    hobbiesData.forEach(hobby => {
-      const category = hobby.category || 'Other';
-      if (!categories[category]) {
-        categories[category] = [];
-      }
-      categories[category].push(hobby);
-    });
-
-    // Build sunburst structure
-    const children = Object.entries(categories).map(([category, hobbies]) => ({
-      name: category,
-      children: hobbies.map(hobby => {
-        const hobbyActivities = activitiesData.filter(a => a.hobby_id === hobby.id);
-        return {
-          name: hobby.name,
-          value: hobbyActivities.length || 1,
-          level: hobby.level,
-        };
-      }),
-    }));
-
-    setSunburstData({
-      name: 'Hobbies',
-      children,
-    });
-  }
-
-  // Calculate stats
+  // Stats
   const totalActivities = activities.length;
   const totalMoments = moments.length;
   const totalReflections = reflections.length;
   const totalLevel = hobbies.reduce((sum, h) => sum + h.level, 0);
 
-  // Calculate achievements/milestones
+  // Achievements
   const achievements = [];
   if (hobbies.length >= 1) achievements.push({ icon: '🌱', title: 'First Hobby', desc: 'Started your journey' });
   if (hobbies.length >= 5) achievements.push({ icon: '🌳', title: 'Hobby Collector', desc: '5 hobbies tracked' });
@@ -209,7 +138,7 @@ export default function ProfilePage() {
           </div>
         </motion.div>
 
-        {/* AI-Generated Summary */}
+        {/* AI Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -220,14 +149,49 @@ export default function ProfilePage() {
             <Sparkles className="w-6 h-6 text-primary-600" />
             <h2 className="text-2xl font-bold text-gray-900">Your Journey</h2>
           </div>
-          <p className="text-gray-700 text-lg leading-relaxed">
+          <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-line space-y-3">
             {summary || 'Loading your personalized summary...'}
-          </p>
+          </div>
         </motion.div>
 
-        {/* Charts Grid */}
+        {/* Personality Insights */}
+        {userCharacteristics && userCharacteristics.insights.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl shadow-lg p-8"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-6 h-6 text-purple-600" />
+              <h2 className="text-2xl font-bold text-gray-900">Personality Insights</h2>
+            </div>
+            <div className="space-y-3">
+              {userCharacteristics.dominantTraits.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-semibold text-gray-700">You are:</span>
+                  {userCharacteristics.dominantTraits.map((trait, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold"
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {userCharacteristics.insights.map((insight, idx) => (
+                <p key={idx} className="text-gray-700 text-base flex items-start gap-2">
+                  <span className="text-purple-500 mt-1">✨</span>
+                  <span>{insight}</span>
+                </p>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Radar Chart */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -236,18 +200,20 @@ export default function ProfilePage() {
           >
             <div className="flex items-center gap-2 mb-6">
               <TrendingUp className="w-6 h-6 text-primary-600" />
-              <h2 className="text-2xl font-bold text-gray-900">Skills Overview</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Personality Traits</h2>
             </div>
-            {radarData.length > 0 ? (
-              <RadarChart data={radarData} />
+            <p className="text-sm text-gray-600 mb-4">
+              Your personal characteristics based on your hobbies and activities
+            </p>
+            {userCharacteristics && userCharacteristics.personalityTraits.length > 0 ? (
+              <PersonalityTraitsChart data={userCharacteristics.personalityTraits} />
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>Start logging activities to see your skills!</p>
+                <p>Start adding hobbies to discover your personality traits!</p>
               </div>
             )}
           </motion.div>
 
-          {/* Sunburst Chart */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -256,19 +222,25 @@ export default function ProfilePage() {
           >
             <div className="flex items-center gap-2 mb-6">
               <Sparkles className="w-6 h-6 text-primary-600" />
-              <h2 className="text-2xl font-bold text-gray-900">Hobby Distribution</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Activity Focus</h2>
             </div>
-            {sunburstData && sunburstData.children.length > 0 ? (
-              <SunburstChart data={sunburstData} />
+            <p className="text-sm text-gray-600 mb-4">
+              Outer ring: Category distribution • Inner ring: Recent activities
+            </p>
+            {userCharacteristics && userCharacteristics.activityPreferences.length > 0 ? (
+              <ActivityPreferenceChart
+                data={userCharacteristics.activityPreferences}
+                recentActivities={activities.slice(0, 8)}
+              />
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>Add hobbies to see your distribution!</p>
+                <p>Add hobbies to see your activity preferences!</p>
               </div>
             )}
           </motion.div>
         </div>
 
-        {/* Milestone Achievements */}
+        {/* Achievements */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -301,6 +273,25 @@ export default function ProfilePage() {
             </div>
           )}
         </motion.div>
+
+        {/* Logout Button at Bottom */}
+        <div className="mt-8">
+          <button
+            onClick={async () => {
+              const confirmed = window.confirm('Are you sure you want to logout?');
+              if (!confirmed) return;
+
+              await supabase.auth.signOut();
+              router.push('/auth/login');
+            }}
+            className="w-full md:w-96 mx-auto block px-6 py-3 rounded-full bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+          >
+            <LogOut className="w-5 h-5" />
+            Logout
+          </button>
+        </div>
+
+
       </div>
     </div>
   );

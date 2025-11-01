@@ -9,6 +9,7 @@ import HobbyCard from '@/components/HobbyCard';
 import AddLogModal from '@/components/AddLogModal';
 import AddHobbyModal from '@/components/AddHobbyModal';
 import NavHeader from '@/components/NavHeader';
+import HobbyRecommendationCard from '@/components/HobbyRecommendationCard';
 import { motion } from 'framer-motion';
 
 export default function HobbiesPage() {
@@ -89,6 +90,11 @@ export default function HobbiesPage() {
             Add Hobby
           </button>
         </div>
+
+        {/* Hobby Recommendations */}
+        {userId && hobbies.length > 0 && (
+          <HobbyRecommendationCard userId={userId} currentHobbies={hobbies} />
+        )}
 
         {hobbies.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-lg shadow">

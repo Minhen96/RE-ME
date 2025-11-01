@@ -1,185 +1,331 @@
-  # RE:ME - Your Self-Growth Journey 🌱
+# RE:ME - Your Personal Growth Journey 🌱
 
-  A private, calm self-growth web app that helps you track hobbies, reflect on your journey, and visualize your
-  personal growth through an interactive Life Tree.
+**RE:ME** is an AI-powered self-growth companion that helps you track hobbies, reflect on your experiences, and visualize your personal development journey through beautiful interactive visualizations.
 
-  ## Features
+## 🎯 Problem Statement
 
-  - 🎯 **Hobby Tracking** - Log activities with AI-driven interpretation
-  - ⚡ **Dynamic EXP System** - Earn experience points and level up your hobbies
-  - 🌙 **Daily Reflections** - Journal your thoughts with AI-powered emotional analysis
-  - ❤️ **Happy Moments Gallery** - Capture and cherish your favorite memories
-  - 🌳 **Life Tree Visualization** - Interactive D3.js tree showing your complete growth journey
-  - 🤖 **AI-Powered Insights** - Get personalized recommendations based on your activities
+In today's fast-paced world, people struggle to:
+- **Track personal growth** across multiple hobbies and interests
+- **Maintain motivation** without visible progress indicators
+- **Reflect meaningfully** on their experiences and emotions
+- **Understand themselves** through scattered activities and thoughts
+- **Stay consistent** without personalized insights and encouragement
 
-  ## Tech Stack
+Traditional journaling apps are static, hobby trackers lack emotional depth, and productivity apps focus on tasks rather than personal fulfillment.
 
-  - **Frontend**: Next.js 14, React, TypeScript, TailwindCSS, Framer Motion
-  - **Backend**: Supabase (Postgres, Auth, Storage, pgvector)
-  - **AI**: OpenAI GPT-4 / Anthropic Claude (switchable)
-  - **Visualization**: D3.js
+## ✨ Solution
 
-  ## Setup Instructions
+RE:ME combines **AI intelligence** with **gamification** and **beautiful visualizations** to create a holistic personal growth platform:
 
-  ### 1. Clone and Install
+- **🤖 AI-Powered Insights**: Analyzes your activities, extracts skills, and provides personalized recommendations
+- **⚡ Dynamic EXP System**: Gamified progression that makes growth tangible and rewarding
+- **🌳 Life Tree Visualization**: Your journey comes alive through an interactive D3.js tree
+- **💭 Soulmate AI Chatbot**: An empathetic companion who knows you deeply and provides meaningful conversations
+- **📊 Personality Analytics**: Understand your traits through scientifically-backed analysis
+- **🎨 Beautiful UX**: Calm, aesthetic design with smooth animations powered by Framer Motion
 
-  ```bash
-  git clone <your-repo>
-  cd reme
-  npm install
+## 🚀 Key Features
 
-  2. Environment Variables
+### 1. Hobby Tracking & Leveling System
+- Track multiple hobbies with individual progression
+- Earn EXP points based on activity depth and complexity
+- AI analyzes each activity to identify demonstrated skills
+- Visual level-up animations and achievement badges
 
-  Your .env file already contains:
-  SUPABASE_URL=https://uklpgchhzvqhbvebhpng.supabase.co
-  SUPABASE_KEY=<your-anon-key>
-  SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
-  OPENAI_API_KEY=<your-openai-key>
-  AI_PROVIDER=openai
+### 2. AI-Powered Activity Analysis
+- Automatically extracts skills from activity descriptions
+- Calculates EXP based on depth, complexity, and learning
+- Provides encouragement and insights
+- Tracks progress over time
 
-  3. Database Setup
+### 3. Personality Insights & Analytics
+- **6 personality dimensions** analyzed from your activities:
+  - Outdoor Explorer ↔ Indoor Enthusiast
+  - Social Butterfly ↔ Solo Thinker
+  - Creative Spirit ↔ Analytical Mind
+  - Active Mover ↔ Calm Observer
+  - Practical Doer ↔ Theoretical Thinker
+  - Adventure Seeker ↔ Routine Lover
+- **Interactive charts** showing trait distributions
+- **Activity preference analysis** with dual-ring visualization
+- **AI-generated insights** about your personality
 
-  Run the migrations in Supabase SQL Editor:
+### 4. Life Tree Visualization
+- **Interactive D3.js tree** representing your growth journey
+- Branches for hobbies, leaves for activities
+- Flowers for reflections, fruits for happy moments
+- Beautiful animations: clouds, sun rays, falling leaves
+- Replay button to re-experience your journey
 
-  # Copy contents of supabase/migrations.sql
-  # Paste into Supabase SQL Editor and run
+### 5. Soulmate AI Chatbot
+- Empathetic AI companion who understands your personality
+- Context-aware conversations based on your history
+- Provides support, insights, and encouragement
+- Memory-powered responses using vector embeddings
 
-  Important: Also create the vector similarity search function:
+### 6. Daily Reflections & Mood Tracking
+- Journal your thoughts with AI emotional analysis
+- Sentiment scoring and emotion detection
+- Track emotional patterns over time
+- Generate AI summaries of your reflections
 
-  -- Add this to your Supabase SQL Editor
-  create or replace function match_memories(
-    query_embedding vector(1536),
-    match_threshold float,
-    match_count int,
-    filter_user_id uuid
-  )
-  returns table (
-    id uuid,
-    content text,
-    similarity float
-  )
-  language sql stable
-  as $$
-    select
-      id,
-      content,
-      1 - (embedding <=> query_embedding) as similarity
-    from user_memories
-    where user_id = filter_user_id
-      and 1 - (embedding <=> query_embedding) > match_threshold
-    order by similarity desc
-    limit match_count;
-  $$;
+### 7. Happy Moments Gallery
+- Capture and cherish favorite memories
+- Image support with Supabase storage
+- Searchable with AI-powered semantic search
+- Beautifully displayed in a responsive grid
 
-  4. Run Development Server
+### 8. Smart Hobby Recommendations
+- AI suggests new hobbies based on your personality
+- Personalized reasons explaining why each fits you
+- Difficulty ratings and expected benefits
+- Collapsible UI for non-intrusive suggestions
 
-  npm run dev
+## 🛠 Tech Stack
 
-  Visit http://localhost:3000
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **TailwindCSS** - Utility-first styling
+- **Framer Motion** - Smooth animations
+- **D3.js** - Data visualizations
+- **Lucide React** - Beautiful icons
 
-  Switching AI Providers
+### Backend & Database
+- **Supabase** - Backend as a Service
+  - PostgreSQL database
+  - Row Level Security (RLS)
+  - Authentication
+  - Storage for images
+  - pgvector for semantic search
 
-  Using OpenAI (Default)
+### AI & ML
+- **OpenAI GPT-4** / **Anthropic Claude** (switchable)
+- Embeddings for semantic search (text-embedding-ada-002)
+- Vector similarity search with pgvector
 
-  AI_PROVIDER=openai
-  OPENAI_API_KEY=sk-...
+### Deployment
+- **Vercel** - Serverless deployment
+- Edge Functions for API routes
+- Environment variable management
 
-  Using Claude
+## 📦 Installation & Setup
 
-  AI_PROVIDER=claude
-  ANTHROPIC_API_KEY=sk-ant-...
+### Prerequisites
+- Node.js 18+ and npm
+- Supabase account
+- OpenAI API key or Anthropic API key
 
-  The app automatically switches between providers based on AI_PROVIDER setting.
+### 1. Clone Repository
+```bash
+git clone https://github.com/yourusername/reme.git
+cd reme
+npm install
+```
 
-  Project Structure
+### 2. Environment Variables
 
-  ├── app/
-  │   ├── onboarding/         # User onboarding flow
-  │   ├── dashboard/          # Main dashboard
-  │   ├── hobby/[id]/         # Individual hobby details
-  │   ├── reflection/         # Daily reflection journal
-  │   ├── moments/            # Happy moments gallery
-  │   ├── tree/               # Life Tree visualization
-  │   └── api/                # API routes (Edge Functions)
-  ├── components/             # Reusable React components
-  ├── lib/
-  │   ├── supabaseClient.ts  # Supabase client setup
-  │   ├── aiProvider.ts      # AI provider wrapper
-  │   ├── api.ts             # API helper functions
-  │   └── types.ts           # TypeScript definitions
-  ├── supabase/
-  │   └── migrations.sql     # Database schema
-  └── styles/
-      └── globals.css        # Global styles
+Create a `.env.local` file:
 
+```env
+# Supabase
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-  Deployment
+# AI Provider (choose one)
+AI_PROVIDER=openai  # or 'claude'
 
-  Deploy to Vercel
+# OpenAI
+OPENAI_API_KEY=sk-...
 
-  1. Push to GitHub
-  2. Import project in Vercel
-  3. Add environment variables
-  4. Deploy
+# Anthropic (optional)
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
-  Environment Variables for Production
+### 3. Database Setup
 
-  Make sure to add all variables from .env to your Vercel project settings.
+Run the migrations in your Supabase SQL Editor:
 
-  Usage
+1. Copy and run `supabase/migrations.sql`
+2. Copy and run `supabase/2nd_migrations.sql`
 
-  1. Onboarding - Set up your profile and add hobbies
-  2. Log Activities - Click on a hobby card to log activities
-  3. Daily Reflections - Visit /reflection to journal
-  4. View Progress - Check your Life Tree at /tree
-  5. Happy Moments - Capture memories at /moments
+### 4. Storage Buckets
 
-  Key Features Explained
+Create storage buckets in Supabase dashboard:
+- `activity-images`
+- `moment-images`
 
-  EXP System
+Set them as private and configure RLS policies.
 
-  - Base EXP: 10 points per skill demonstrated
-  - Depth Bonus: +5 for detailed activities (>100 chars)
-  - AI analyzes each activity to identify skills
+### 5. Run Development Server
 
-  Life Tree Visualization
+```bash
+npm run dev
+```
 
-  - Trunk: Overall growth
-  - Branches: Individual hobbies
-  - Leaves: Activities logged
-  - Flowers: Reflections
-  - Fruits: Happy moments
+Visit [http://localhost:3000](http://localhost:3000)
 
-  AI Integration
+## 📁 Project Structure
 
-  - Activity interpretation and skill extraction
-  - Reflection emotional analysis
-  - Personalized recommendations via semantic search
-  - Auto-generated hobby metadata
+```
+reme/
+├── app/
+│   ├── page.tsx                    # Dashboard / Landing
+│   ├── onboarding/                 # User onboarding flow
+│   ├── hobbies/                    # Hobby management
+│   ├── hobby/[id]/                 # Individual hobby details
+│   ├── profile/                    # User profile & analytics
+│   ├── tree/                       # Life Tree visualization
+│   ├── moments/                    # Happy moments gallery
+│   ├── soulmate/                   # AI chatbot page
+│   └── api/                        # API routes
+│       ├── analyze-activity/       # Activity AI analysis
+│       ├── analyze-reflection/     # Reflection sentiment analysis
+│       ├── create-hobby/           # Hobby creation with AI
+│       ├── create-moment/          # Moment creation
+│       ├── generate-profile-summary/  # AI profile summary
+│       ├── generate-quote/         # Daily motivational quotes
+│       ├── recommend/              # Smart recommendations
+│       ├── recommend-hobbies/      # Hobby suggestions
+│       └── soulmate-chat/          # AI chatbot endpoint
+├── components/
+│   ├── charts/                     # D3.js visualization components
+│   │   ├── PersonalityTraitsChart.tsx
+│   │   └── ActivityPreferenceChart.tsx
+│   ├── AddActivityModal.tsx
+│   ├── AddHobbyModal.tsx
+│   ├── HobbyCard.tsx
+│   ├── HobbyRecommendationCard.tsx
+│   ├── LifeTreeView.tsx
+│   ├── NavHeader.tsx
+│   └── TreeVisualization.tsx
+├── lib/
+│   ├── supabaseClient.ts          # Supabase client setup
+│   ├── aiProvider.ts              # Unified AI provider wrapper
+│   ├── api.ts                     # API utilities
+│   ├── types.ts                   # TypeScript definitions
+│   ├── userCharacteristics.ts     # Personality analysis logic
+│   └── levelUtils.ts              # EXP and leveling calculations
+├── supabase/
+│   ├── migrations.sql             # Main database schema
+│   └── 2nd_migrations.sql         # Vector search function
+└── styles/
+    └── globals.css                # Global styles & Tailwind
+```
 
-  Troubleshooting
+## 🎮 Usage Guide
 
-  Missing Environment Variables
+### Getting Started
+1. **Sign Up** - Create your account via email/password
+2. **Onboarding** - Set up your profile (name, MBTI, age)
+3. **Add Hobbies** - Create your first hobby to start tracking
 
-  The app will log warnings if variables are missing. Check console output.
+### Daily Workflow
+1. **Log Activities** - Click on a hobby card to log what you did
+2. **Earn EXP** - Watch your hobby level up as you progress
+3. **Daily Reflection** - Journal your thoughts and feelings
+4. **Capture Moments** - Save happy moments with photos
+5. **Check Tree** - Visualize your growth journey
 
-  Supabase Connection Issues
+### Advanced Features
+- **Profile Analytics** - View personality insights and charts
+- **Soulmate Chat** - Have meaningful conversations with AI
+- **Get Recommendations** - Discover new hobbies based on your personality
+- **Replay Tree** - Watch your journey unfold with animations
 
-  Verify your SUPABASE_URL and SUPABASE_KEY are correct.
+## 🎨 Design Philosophy
 
-  AI API Errors
+RE:ME embraces a **calm, aesthetic, and encouraging** design:
+- Soft gradients and pastel colors
+- Smooth transitions and micro-animations
+- Clear hierarchy and generous white space
+- Encouraging copy and positive reinforcement
+- Dark mode support (planned)
 
-  - Check your API key is valid
-  - Verify AI_PROVIDER matches your configured key
-  - Monitor rate limits
+## 🧠 AI Integration Details
 
-  Contributing
+### Activity Analysis
+```typescript
+POST /api/analyze-activity
+{
+  "activityText": "I spent 2 hours practicing watercolor landscapes...",
+  "hobbyCategory": "Creative"
+}
+```
+Returns: Skills identified, EXP calculation, encouragement
 
-  This is a personal project. Feel free to fork and customize for your own use!
+### Personality Analysis
+Analyzes hobby categories and activity patterns to determine:
+- Indoor vs Outdoor preference
+- Social vs Solo tendencies
+- Creative vs Analytical inclination
+- Active vs Calm nature
+- Practical vs Theoretical approach
+- Adventure vs Routine preference
 
-  License
+### Semantic Search
+Uses OpenAI embeddings (1536 dimensions) to:
+- Find similar past activities
+- Power the Soulmate AI with relevant context
+- Generate personalized recommendations
 
-  MIT
+## 🔐 Security & Privacy
 
-  ---
-  Built with ❤️ using Next.js and Supabase
+- **Row Level Security (RLS)** - Users can only access their own data
+- **Secure authentication** via Supabase Auth
+- **Private storage buckets** with user-scoped policies
+- **No data sharing** - Your journey is completely private
+- **API key security** - Keys stored in environment variables
+
+## 🌟 Future Enhancements
+
+- [ ] Social features (optional friend connections)
+- [ ] Dark mode support
+- [ ] Mobile app (React Native)
+- [ ] Export data (PDF reports)
+- [ ] Habit streaks and reminders
+- [ ] Goal setting and tracking
+- [ ] Community challenges
+- [ ] Advanced analytics dashboard
+- [ ] Multi-language support
+- [ ] Voice journaling
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Environment Variables Not Loading**
+- Ensure `.env.local` exists in root directory
+- Restart development server after changes
+
+**Supabase Connection Error**
+- Verify `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+- Check if RLS policies are properly configured
+
+**AI API Errors**
+- Verify API key is valid and has credits
+- Check `AI_PROVIDER` matches your configured key
+- Monitor rate limits in provider dashboard
+
+**Images Not Uploading**
+- Ensure storage buckets are created
+- Verify RLS policies allow user uploads
+- Check file size limits (default 50MB)
+
+## 📄 License
+
+MIT License - feel free to use for personal or educational purposes.
+
+## 🙏 Acknowledgments
+
+Built with ❤️ using:
+- Next.js and React team
+- Supabase team
+- OpenAI / Anthropic
+- D3.js community
+- All open-source contributors
+
+---
+
+**Made for Hackathon 2025** | [Demo](https://reme.vercel.app) | [Documentation](./TECHNICAL.md)

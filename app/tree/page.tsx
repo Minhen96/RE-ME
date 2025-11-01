@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
@@ -15,12 +15,14 @@ export default function TreePage() {
   const [activitiesData, setActivitiesData] = useState<any[]>([]);
   const [reflectionsData, setReflectionsData] = useState<any[]>([]);
   const [momentsData, setMomentsData] = useState<any[]>([]);
+  const [treeKey, setTreeKey] = useState(0);
 
   useEffect(() => {
     loadTreeData();
   }, []);
 
-  async function loadTreeData() {
+  // Use useCallback for loadTreeData to prevent unnecessary re-renders/warnings
+  const loadTreeData = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -28,6 +30,7 @@ export default function TreePage() {
         return;
       }
 
+      // Fetch all data in parallel
       const [profileData, hobbies, activities, reflections, moments] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('hobbies').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -46,7 +49,15 @@ export default function TreePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [router]);
+
+  useEffect(() => {
+    loadTreeData();
+  }, [loadTreeData]);
+
+  const replayAnimation = () => {
+    setTreeKey(prevKey => prevKey + 1);
+  };
 
   const stats = {
     hobbies: hobbiesData.length,
@@ -65,7 +76,6 @@ export default function TreePage() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
       <NavHeader userName={profile?.display_name} />
@@ -73,10 +83,14 @@ export default function TreePage() {
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Life Tree 🌳</h1>
-            <p className="text-gray-600">
-              Trunk = Total Growth | Branches = Hobbies | Leaves = Activities | Flowers = Reflections | Fruits = Happy Moments
-            </p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center">
+              Life Tree 🌳
+            </h1>
+            <div className="mt-5 text-center">
+              <p className="text-gray-800">
+                It is growing beautifully!🌱 Total Growth: {stats.hobbies + stats.activities + stats.reflections + stats.moments} moments
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
@@ -101,22 +115,16 @@ export default function TreePage() {
               <div className="text-sm text-gray-600 mt-1">Fruits</div>
             </div>
           </div>
+          
 
           <TreeVisualization
+            // 4. Using the changing key to force the component to re-mount and restart animations
+            key={treeKey} 
             hobbies={hobbiesData}
             activities={activitiesData}
             reflections={reflectionsData}
             moments={momentsData}
           />
-
-          <div className="mt-8 text-center">
-            <p className="text-xl font-semibold text-gray-800 mb-2">
-              Your tree is growing beautifully!
-            </p>
-            <p className="text-gray-600">
-              Total Growth: {stats.hobbies + stats.activities + stats.reflections + stats.moments} moments
-            </p>
-          </div>
         </div>
       </div>
     </div>
