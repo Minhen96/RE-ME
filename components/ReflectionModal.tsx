@@ -42,7 +42,6 @@ export default function ReflectionModal({
 
   useEffect(() => {
     if (isOpen) {
-      // Set a random question when modal opens
       setCurrentQuestion(REFLECTION_QUESTIONS[Math.floor(Math.random() * REFLECTION_QUESTIONS.length)]);
     }
   }, [isOpen]);
@@ -103,7 +102,7 @@ export default function ReflectionModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={handleClose}
           />
 
@@ -111,137 +110,155 @@ export default function ReflectionModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 z-10 max-h-[90vh] overflow-y-auto"
+            className="relative bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-xl max-w-2xl w-full z-10 max-h-[90vh] overflow-y-auto border border-purple-200"
           >
             {!showSuccess ? (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Moon className="w-6 h-6 text-indigo-600" />
-                    <h2 className="text-2xl font-bold text-gray-900">Daily Reflection</h2>
-                  </div>
-                  <button
-                    onClick={handleClose}
-                    disabled={isSubmitting}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Question Section */}
-                {showQuestion && (
-                  <div className="mb-4 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <p className="text-sm text-indigo-600 font-medium mb-1">Today's Prompt</p>
-                        <p className="text-gray-800 font-medium">{currentQuestion}</p>
+                {/* Header */}
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-6 rounded-t-2xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <Moon className="w-6 h-6 text-white" />
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={refreshQuestion}
-                          className="p-2 hover:bg-indigo-100 rounded-full transition-colors"
-                          title="Get a different question"
-                        >
-                          <RefreshCw className="w-4 h-4 text-indigo-600" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowQuestion(false)}
-                          className="p-2 hover:bg-indigo-100 rounded-full transition-colors"
-                          title="Hide question"
-                        >
-                          <X className="w-4 h-4 text-indigo-600" />
-                        </button>
+                      <div>
+                        <h2 className="text-2xl font-bold text-white">Daily Reflection</h2>
+                        <p className="text-purple-100 text-sm">Take a moment to reflect on your day</p>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {!showQuestion && (
-                  <button
-                    type="button"
-                    onClick={() => setShowQuestion(true)}
-                    className="mb-4 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-                  >
-                    + Show question prompt
-                  </button>
-                )}
-
-                <p className="text-gray-600 text-sm mb-4">
-                  {showQuestion
-                    ? "Reflect on the question above, or write freely about your day."
-                    : "Take a moment to reflect on your day. How are you feeling?"}
-                </p>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    rows={8}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-                    placeholder="What's on your mind tonight? Share your thoughts, feelings, and what you learned today..."
-                    disabled={isSubmitting}
-                    required
-                  />
-
-                  <EmotionSlider
-                    value={emotion}
-                    onChange={setEmotion}
-                    defaultAutoAnalyze={true}
-                  />
-
-                  <div className="flex gap-3 justify-end">
                     <button
-                      type="button"
                       onClick={handleClose}
                       disabled={isSubmitting}
-                      className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                      className="p-2 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50"
                     >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting || !text.trim()}
-                      className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Reflecting...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4" />
-                          Submit Reflection
-                        </>
-                      )}
+                      <X className="w-5 h-5 text-white" />
                     </button>
                   </div>
-                </form>
+                </div>
+
+                <div className="p-6 space-y-5">
+                  {/* Question Prompt */}
+                  {showQuestion && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-5 bg-white rounded-xl border-2 border-purple-200 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Sparkles className="w-4 h-4 text-purple-500" />
+                            <p className="text-sm font-semibold text-purple-600">Today's Prompt</p>
+                          </div>
+                          <p className="text-gray-800 font-medium leading-relaxed">{currentQuestion}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={refreshQuestion}
+                            className="p-2 hover:bg-purple-100 rounded-full transition-colors"
+                            title="Get a different question"
+                          >
+                            <RefreshCw className="w-4 h-4 text-purple-600" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowQuestion(false)}
+                            className="p-2 hover:bg-purple-100 rounded-full transition-colors"
+                            title="Hide question"
+                          >
+                            <X className="w-4 h-4 text-purple-600" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {!showQuestion && (
+                    <button
+                      type="button"
+                      onClick={() => setShowQuestion(true)}
+                      className="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Show today's prompt
+                    </button>
+                  )}
+
+                  {/* Form */}
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Your Reflection
+                      </label>
+                      <textarea
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        rows={8}
+                        className="w-full px-4 py-3 bg-white border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none transition-all"
+                        placeholder="Share your thoughts, feelings, and what you learned today..."
+                        disabled={isSubmitting}
+                        required
+                      />
+                    </div>
+
+                    <EmotionSlider
+                      value={emotion}
+                      onChange={setEmotion}
+                      defaultAutoAnalyze={true}
+                    />
+
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleClose}
+                        disabled={isSubmitting}
+                        className="flex-1 px-4 py-3 text-gray-700 bg-white hover:bg-gray-50 rounded-xl font-medium transition-colors border-2 border-gray-200 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || !text.trim()}
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Reflecting...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" />
+                            Save Reflection
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </>
             ) : (
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-center py-8"
+                className="text-center py-12 px-6"
               >
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                  className="text-6xl mb-4"
+                  className="text-7xl mb-6"
                 >
                   🌙
                 </motion.div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Reflection Saved!</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Reflection Saved!</h3>
                 {result && (
-                  <div className="mt-4 bg-indigo-50 rounded-lg p-4">
-                    <p className="text-lg text-indigo-900 mb-2">
-                      You felt <span className="font-semibold">{result.emotion}</span> tonight
+                  <div className="mt-6 p-6 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
+                    <p className="text-lg text-gray-900 mb-3">
+                      You felt <span className="font-bold text-purple-600">{result.emotion}</span> tonight
                     </p>
-                    <p className="text-sm text-gray-700">{result.summary}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{result.summary}</p>
                   </div>
                 )}
               </motion.div>

@@ -209,7 +209,7 @@ export default function HomePage() {
             <div className="w-1/2 flex flex-col p-7 pr-4"> 
                 {/* Title in black, bold */}
                 <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    Today's Moment
+                    Flashback
                 </h3>
                 
                 <div className="flex flex-col items-start justify-end flex-grow"> 
@@ -237,23 +237,25 @@ export default function HomePage() {
             </div>
 
             {/* Right: Image */}
-            <div className="w-1/2 relative bg-gray-50">
+            <div className="w-1/2 relative bg-gray-50 flex items-center justify-center overflow-hidden rounded-r-2xl">
                 {randomMoment?.image_path ? (
                     <img
                         src={getMomentImageUrl(randomMoment.image_path) || ''}
                         alt={randomMoment.text || 'Happy moment'}
-                        className="w-full h-full object-cover rounded-r-2xl"
+                        className="w-full object-cover"
+                        style={{ height: '160px', maxHeight: '160px' }}
                         onError={(e) => {
                              e.currentTarget.className = 'hidden';
                              const parent = e.currentTarget.parentElement;
                              if (parent) {
-                               parent.className = 'w-full h-full bg-gradient-to-br from-indigo-100 to-pink-100 flex items-center justify-center rounded-r-2xl';
+                               parent.className = 'w-full bg-gradient-to-br from-indigo-100 to-pink-100 flex items-center justify-center rounded-r-2xl';
+                               parent.style.height = '160px';
                                parent.innerHTML = '<svg class="w-10 h-10 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-5 4h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
                              }
                         }}
                     />
                 ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-r-2xl">
+                    <div className="w-full bg-gray-100 flex items-center justify-center rounded-r-2xl" style={{ height: '160px' }}>
                         <p className="text-gray-400 text-sm italic">No Image</p>
                     </div>
                 )}

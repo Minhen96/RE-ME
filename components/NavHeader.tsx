@@ -19,8 +19,8 @@ export default function NavHeader({ userName }: NavHeaderProps) {
     { name: 'Dashboard', path: '/', emoji: '🏠' },
     { name: 'Hobbies', path: '/hobbies', emoji: '🎨' },
     { name: 'Moments', path: '/moments', emoji: '❤️' },
-    { name: 'Life Tree', path: '/tree', emoji: '🌳' },
     { name: 'Soulmate', path: '/soulmate', emoji: '💕' },
+    { name: 'Life Tree', path: '/tree', emoji: '🌳' },
   ];
 
   const isActive = (path: string) => pathname === path;

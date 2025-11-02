@@ -123,7 +123,7 @@ export default function AddMomentModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={handleClose}
           />
 
@@ -131,35 +131,48 @@ export default function AddMomentModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 z-10"
+            className="relative bg-gradient-to-br from-rose-50 to-orange-50 rounded-2xl shadow-xl max-w-lg w-full z-10 border border-rose-200"
           >
             {!showSuccess ? (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900">Capture a Happy Moment</h2>
-                  <button
-                    onClick={handleClose}
-                    disabled={isSubmitting}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                {/* Header */}
+                <div className="bg-gradient-to-r from-red-400 to-orange-400 p-6 rounded-t-2xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <Heart className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-white">Capture a Happy Moment</h2>
+                        <p className="text-red-50 text-sm">What made you smile today?</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleClose}
+                      disabled={isSubmitting}
+                      className="p-2 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50"
+                    >
+                      <X className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
                 </div>
 
-                <p className="text-gray-600 mb-4">
-                  What made you smile today? ❤️
-                </p>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <textarea
-                    value={momentText}
-                    onChange={(e) => setMomentText(e.target.value)}
-                    placeholder="Describe this happy moment..."
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                    disabled={isSubmitting}
-                    required
-                  />
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Describe your moment
+                    </label>
+                    <textarea
+                      value={momentText}
+                      onChange={(e) => setMomentText(e.target.value)}
+                      placeholder="A wonderful moment happened today..."
+                      rows={4}
+                      className="w-full px-4 py-3 bg-white border-2 border-rose-200 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-red-400 resize-none transition-all"
+                      disabled={isSubmitting}
+                      required
+                    />
+                  </div>
 
                   {/* Image Upload */}
                   <div>
@@ -171,24 +184,22 @@ export default function AddMomentModal({
                         <img
                           src={imagePreview}
                           alt="Preview"
-                          className="w-full h-48 object-cover rounded-lg"
+                          className="w-full h-48 object-cover rounded-xl border-2 border-rose-200"
                         />
                         <button
                           type="button"
                           onClick={removeImage}
                           disabled={isSubmitting}
-                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
+                          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm text-gray-700 rounded-full hover:bg-white transition-colors shadow-lg disabled:opacity-50"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     ) : (
-                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-red-400 transition-colors">
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-500">Click to upload image</p>
-                          <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
-                        </div>
+                      <label className="flex flex-col items-center justify-center w-full p-8 bg-white border-2 border-dashed border-rose-300 rounded-xl cursor-pointer hover:border-red-400 hover:bg-rose-50 transition-all">
+                        <Upload className="w-10 h-10 text-rose-400 mb-3" />
+                        <p className="text-sm font-medium text-gray-700 mb-1">Click to upload image</p>
+                        <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
                         <input
                           type="file"
                           accept="image/*"
@@ -206,28 +217,28 @@ export default function AddMomentModal({
                     defaultAutoAnalyze={true}
                   />
 
-                  <div className="flex gap-3 justify-end">
+                  <div className="flex gap-3 pt-2">
                     <button
                       type="button"
                       onClick={handleClose}
                       disabled={isSubmitting}
-                      className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                      className="flex-1 px-4 py-3 text-gray-700 bg-white hover:bg-gray-50 rounded-xl font-medium transition-colors border-2 border-gray-200 disabled:opacity-50"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting || !momentText.trim()}
-                      className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-red-400 to-orange-400 hover:from-red-500 hover:to-orange-500 text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                     >
                       {isSubmitting ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-5 h-5 animate-spin" />
                           Saving...
                         </>
                       ) : (
                         <>
-                          <Heart className="w-4 h-4" />
+                          <Heart className="w-5 h-5" />
                           Save Moment
                         </>
                       )}
@@ -239,19 +250,19 @@ export default function AddMomentModal({
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-center py-8"
+                className="text-center py-12 px-6"
               >
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                  className="text-6xl mb-4"
+                  className="text-7xl mb-6"
                 >
                   ❤️
                 </motion.div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Moment Saved!</h3>
-                <p className="text-md text-gray-700">
-                  Your happy memory has been captured
+                <p className="text-gray-600">
+                  Your happy memory has been captured forever
                 </p>
               </motion.div>
             )}
