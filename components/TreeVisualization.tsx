@@ -22,6 +22,8 @@ export default function TreeVisualization({
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [hoveredItem, setHoveredItem] = useState<any>(null);
   const [animationKey, setAnimationKey] = useState(0);
+  const [useLocalTime, setUseLocalTime] = useState(true);
+  const [customHour, setCustomHour] = useState(12);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,9 +49,9 @@ export default function TreeVisualization({
     const totalGrowth = totalLevel + totalActivities;
 
     // Sky gradient - dynamic based on time
-    const currentHour = new Date().getHours();
+    const currentHour = useLocalTime ? new Date().getHours() : customHour;
     const isNight = currentHour >= 18 || currentHour <= 6;
-    const isMorning = currentHour >= 6 && currentHour <= 12;
+    const isMorning = currentHour > 6 && currentHour <= 12;
     
     const bgGradient = svg
       .append('defs')
@@ -405,14 +407,14 @@ export default function TreeVisualization({
       }
     });
 
-    // Reflections in sky
-    reflections.slice(0, Math.min(15, reflections.length)).forEach((reflection, index) => {
-      const starX = 80 + (index % 7) * 120 + Math.random() * 40;
-      const starY = 50 + Math.floor(index / 7) * 100 + Math.random() * 60;
-      const starSize = 20 + Math.random() * 10;
-      
-      const icon = isNight ? '⭐' : isMorning ? '☁️' : '☀️';
-      
+    // Reflections in sky - bigger clouds/stars representing user reflections
+    reflections.slice(0, Math.min(12, reflections.length)).forEach((reflection, index) => {
+      const starX = 100 + (index % 6) * 140 + Math.random() * 30;
+      const starY = 60 + Math.floor(index / 6) * 140 + Math.random() * 40;
+      const starSize = 48 + Math.random() * 16; // Much bigger: 48-64px
+
+      const icon = isNight ? '⭐' : isMorning ? '☁️' : '☁️'; // Use clouds for day/morning
+
       const star = svg
         .append('text')
         .attr('x', starX)
@@ -428,7 +430,7 @@ export default function TreeVisualization({
           d3.select(this)
             .transition()
             .duration(200)
-            .attr('font-size', `${starSize + 8}px`);
+            .attr('font-size', `${starSize + 12}px`);
         })
         .on('mouseleave', function () {
           d3.select(this)
@@ -436,12 +438,12 @@ export default function TreeVisualization({
             .duration(200)
             .attr('font-size', `${starSize}px`);
         });
-      
+
       star
         .transition()
         .duration(600)
         .delay(3000 + index * 100)
-        .attr('opacity', isNight ? 0.9 : 0.7);
+        .attr('opacity', isNight ? 0.9 : 0.8);
     });
 
     // Happy moments as flowers on ground
@@ -484,36 +486,6 @@ export default function TreeVisualization({
         .attr('opacity', 1);
     });
 
-    // Animated clouds drifting across sky
-    if (!isNight) {
-      for (let i = 0; i < 3; i++) {
-        const cloudY = 80 + i * 60;
-        const startX = -100 - i * 150;
-
-        const cloud = svg
-          .append('text')
-          .attr('x', startX)
-          .attr('y', cloudY)
-          .attr('font-size', '48px')
-          .attr('opacity', 0.6)
-          .text('☁️')
-          .style('pointer-events', 'none');
-
-        function animateCloud() {
-          cloud
-            .transition()
-            .duration(30000 + i * 5000)
-            .ease(d3.easeLinear)
-            .attr('x', width + 100)
-            .on('end', () => {
-              cloud.attr('x', startX);
-              animateCloud();
-            });
-        }
-
-        setTimeout(() => animateCloud(), 4000 + i * 3000);
-      }
-    }
 
     // Sun rays (daytime only)
     if (!isNight && !isMorning) {
@@ -587,7 +559,7 @@ export default function TreeVisualization({
     // Cleanup interval on unmount
     return () => clearInterval(leafInterval);
 
-  }, [hobbies, activities, reflections, moments, router, animationKey]);
+  }, [hobbies, activities, reflections, moments, router, animationKey, useLocalTime, customHour]);
 
   if (hobbies.length === 0) {
     return (
@@ -606,8 +578,78 @@ export default function TreeVisualization({
     );
   }
 
+  // Get time of day label
+  const getTimeLabel = () => {
+    const hour = useLocalTime ? new Date().getHours() : customHour;
+    if (hour >= 18 || hour <= 6) return '🌙 Night';
+    if (hour > 6 && hour <= 12) return '🌅 Morning';
+    if (hour > 12 && hour < 18) return '☀️ Afternoon';
+    return '🌆 Evening';
+  };
+
   return (
     <div className="relative">
+      {/* Time Controls */}
+      <div className="mb-6 bg-white rounded-xl shadow-md p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Time of Day Settings</h3>
+
+        {/* Checkbox for local time */}
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="useLocalTime"
+            checked={useLocalTime}
+            onChange={(e) => setUseLocalTime(e.target.checked)}
+            className="w-5 h-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500 cursor-pointer"
+          />
+          <label htmlFor="useLocalTime" className="text-sm font-medium text-gray-700 cursor-pointer">
+            Use Local Time (Current: {new Date().getHours()}:00)
+          </label>
+        </div>
+
+        {/* Time slider */}
+        {!useLocalTime && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label htmlFor="timeSlider" className="text-sm font-medium text-gray-700">
+                Custom Time: {customHour}:00
+              </label>
+              <span className="text-sm font-semibold text-primary-600">
+                {getTimeLabel()}
+              </span>
+            </div>
+            <input
+              type="range"
+              id="timeSlider"
+              min="0"
+              max="23"
+              value={customHour}
+              onChange={(e) => setCustomHour(parseInt(e.target.value))}
+              className="w-full h-2 bg-gradient-to-r from-indigo-900 via-blue-400 to-indigo-900 rounded-lg appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right,
+                  #1e293b 0%,
+                  #1e293b 25%,
+                  #fef3c7 30%,
+                  #dbeafe 35%,
+                  #bfdbfe 50%,
+                  #dbeafe 65%,
+                  #fef3c7 70%,
+                  #1e293b 75%,
+                  #1e293b 100%)`
+              }}
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>0:00 (Midnight)</span>
+              <span>6:00 (Dawn)</span>
+              <span>12:00 (Noon)</span>
+              <span>18:00 (Dusk)</span>
+              <span>23:00</span>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex items-center justify-center bg-gradient-to-b from-white to-green-50 rounded-2xl p-8 relative overflow-hidden">
         <svg ref={svgRef}></svg>
 
@@ -717,8 +759,8 @@ export default function TreeVisualization({
           <span className="text-gray-700 font-medium">Fruits = Activities</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-2xl">⭐</span>
-          <span className="text-gray-700 font-medium">Sky = Reflections</span>
+          <span className="text-2xl">☁️</span>
+          <span className="text-gray-700 font-medium">Clouds/Stars = Reflections</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-2xl">🌺</span>

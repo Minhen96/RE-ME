@@ -8,8 +8,8 @@ import {
 // Verify API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-if (!process.env.SUPABASE_URL) {
-  console.warn('[API] SUPABASE_URL not found in environment variables');
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  console.warn('[API] NEXT_PUBLIC_SUPABASE_URL not found in environment variables');
 }
 
 /**

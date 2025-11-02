@@ -9,7 +9,9 @@
       "Bash(npm run dev:*)",
       "Bash(npm install:*)",
       "Bash(cat:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(appauthcallbackroute.ts.tmp)",
+      "Bash(del appauthcallbackroute.ts.tmp 2)"
     ],
     "deny": [],
     "ask": []

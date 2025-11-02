@@ -47,21 +47,47 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+
     setIsLoading(true);
     setError('');
 
     try {
+      console.log('🚀 Starting Google OAuth flow...');
+      console.log('🔗 Redirect URL:', `${window.location.origin}/auth/callback`);
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: false,
+          queryParams: {
+            prompt: 'select_account',
+          },
         },
       });
 
-      if (error) throw error;
+      console.log('📊 OAuth response data:', data);
+      console.log('❌ OAuth response error:', error);
+
+      if (error) {
+        throw error;
+      }
+
+      // Immediately redirect to the OAuth provider URL
+      if (data?.url) {
+        console.log('✅ Redirecting to:', data.url);
+        // Use replace instead of href to avoid adding to history
+        window.location.replace(data.url);
+      } else {
+        console.error('⚠️ No URL returned from OAuth');
+        setError('OAuth URL not generated. Please check your Supabase configuration.');
+        setIsLoading(false);
+      }
     } catch (error: any) {
-      console.error('Google login error:', error);
+      console.error('❌ Google login error:', error);
       setError(error.message || 'Failed to login with Google.');
       setIsLoading(false);
     }
