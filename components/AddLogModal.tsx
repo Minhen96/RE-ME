@@ -37,11 +37,11 @@ export default function AddLogModal({ isOpen, onClose, hobby, userId, onSuccess 
         imagePath,
       });
 
-      setExpGained(result.exp_gained);
+      setExpGained(result.exp_gained || 0);
       setShowSuccess(true);
 
       setTimeout(() => {
-        onSuccess(result.exp_gained);
+        onSuccess(result.exp_gained || 0);
         setText('');
         setImage(null);
         setShowSuccess(false);
