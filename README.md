@@ -1,4 +1,4 @@
-<img width="1919" height="866" alt="image" src="https://github.com/user-attachments/assets/6b45a7c3-61ba-48d6-ba06-87d056736f55" /># RE:ME - Your Personal Growth Journey 🌱
+# RE:ME - Your Personal Growth Journey 🌱
 Demo: https://re-me-bucg.vercel.app/
 
 **RE:ME** is an AI-powered self-growth companion that helps you track hobbies, reflect on your experiences, and visualize your personal development journey through beautiful interactive visualizations.
