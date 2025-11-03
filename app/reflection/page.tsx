@@ -33,7 +33,7 @@ export default function ReflectionPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
 
