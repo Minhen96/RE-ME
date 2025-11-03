@@ -100,7 +100,7 @@ export default function ActivityPreferenceChart({ data, recentActivities = [] }:
     // Add hover effects
     arcs
       .selectAll('path')
-      .on('mouseenter', function (event, d) {
+      .on('mouseenter', function (event, d: any) {
         d3.select(this)
           .transition()
           .duration(200)

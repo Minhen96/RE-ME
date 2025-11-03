@@ -84,7 +84,7 @@ export default function PersonalityTraitsChart({ data }: PersonalityTraitsChartP
       })
       .attr('rx', 4)
       .style('cursor', 'pointer')
-      .on('mouseenter', function (event, d) {
+      .on('mouseenter', function (event, d: any) {
         d3.select(this).attr('opacity', 0.8);
 
         setTooltip({
