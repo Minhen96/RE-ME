@@ -1,6 +1,11 @@
-# RE:ME - Your Personal Growth Journey 🌱
+<img width="1919" height="866" alt="image" src="https://github.com/user-attachments/assets/6b45a7c3-61ba-48d6-ba06-87d056736f55" /># RE:ME - Your Personal Growth Journey 🌱
+Demo: https://re-me-bucg.vercel.app/
 
 **RE:ME** is an AI-powered self-growth companion that helps you track hobbies, reflect on your experiences, and visualize your personal development journey through beautiful interactive visualizations.
+<img width="1919" height="866" alt="Image" src="https://github.com/user-attachments/assets/cb1a9057-7fae-4f1e-81dc-8199372dcfc3" />
+<img width="1919" height="869" alt="Image" src="https://github.com/user-attachments/assets/4ba0f8a6-9167-49a0-9604-733bc5a5c155" />
+<img width="1919" height="863" alt="Image" src="https://github.com/user-attachments/assets/b1d3c91a-e6d0-4bd7-b2f4-a13eeda8b581" />
+<img width="1919" height="860" alt="Image" src="https://github.com/user-attachments/assets/675dd872-058c-44b5-a1d6-faca2e7b7c9c" />
 
 ## 🎯 Problem Statement
 
@@ -319,5 +324,3 @@ Built with ❤️ using:
 - All open-source contributors
 
 ---
-
-**Made for Hackathon 2025** | [Demo](https://reme.vercel.app) | [Documentation](./TECHNICAL.md)
