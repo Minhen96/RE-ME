@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       console.warn('Memory search failed, continuing without context:', err);
     }
 
-    const context = memories.map((m) => m.content).join('') || 'No previous activities found.';
+    const context = memories.map((m: any) => m.content).join('') || 'No previous activities found.';
 
     const aiResponse = await chatCompletion([
       {
