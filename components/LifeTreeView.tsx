@@ -163,7 +163,7 @@ useEffect(() => {
       d3.select(this)
         .transition()
         .duration(200)
-        .attr('r', (d) => {
+        .attr('r', (d: any) => {
           if (d.data.type === 'root') return 18;
           if (d.data.type === 'hobby') return 13;
           return 9;
@@ -173,7 +173,7 @@ useEffect(() => {
       d3.select(this)
         .transition()
         .duration(200)
-        .attr('r', (d) => {
+        .attr('r', (d: any) => {
           if (d.data.type === 'root') return 14;
           if (d.data.type === 'hobby') return 10;
           return 6;
