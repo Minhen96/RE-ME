@@ -14,7 +14,7 @@ export default function ReflectionPage() {
   const [text, setText] = useState('');
   const [emotion, setEmotion] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<{ emotion: string; summary: string } | null>(null);
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
