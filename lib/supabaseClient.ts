@@ -1,17 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Verify environment variables at runtime
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) {
-  console.error('[Supabase] Missing SUPABASE_URL environment variable');
-  throw new Error('Missing SUPABASE_URL environment variable');
+  console.error('[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
+  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
 }
 
 if (!supabaseKey) {
-  console.error('[Supabase] Missing SUPABASE_KEY environment variable');
-  throw new Error('Missing SUPABASE_KEY environment variable');
+  console.error('[Supabase] Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
+  throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
 }
 
 // Create Supabase client for browser/frontend use

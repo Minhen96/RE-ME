@@ -11,7 +11,8 @@
       "Bash(cat:*)",
       "Bash(nul)",
       "Bash(appauthcallbackroute.ts.tmp)",
-      "Bash(del appauthcallbackroute.ts.tmp 2)"
+      "Bash(del appauthcallbackroute.ts.tmp 2)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

@@ -100,7 +100,7 @@ RE:ME combines **AI intelligence** with **gamification** and **beautiful visuali
   - pgvector for semantic search
 
 ### AI & ML
-- **OpenAI GPT-4** / **Anthropic Claude** (switchable)
+- **OpenAI GPT-4**
 - Embeddings for semantic search (text-embedding-ada-002)
 - Vector similarity search with pgvector
 
@@ -114,7 +114,7 @@ RE:ME combines **AI intelligence** with **gamification** and **beautiful visuali
 ### Prerequisites
 - Node.js 18+ and npm
 - Supabase account
-- OpenAI API key or Anthropic API key
+- OpenAI API key 
 
 ### 1. Clone Repository
 ```bash
@@ -129,8 +129,8 @@ Create a `.env.local` file:
 
 ```env
 # Supabase
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 # AI Provider (choose one)
@@ -138,9 +138,6 @@ AI_PROVIDER=openai  # or 'claude'
 
 # OpenAI
 OPENAI_API_KEY=sk-...
-
-# Anthropic (optional)
-ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ### 3. Database Setup
@@ -280,15 +277,10 @@ Uses OpenAI embeddings (1536 dimensions) to:
 
 ## 🌟 Future Enhancements
 
-- [ ] Social features (optional friend connections)
-- [ ] Dark mode support
-- [ ] Mobile app (React Native)
-- [ ] Export data (PDF reports)
+- [ ] Social features & Community challenges (optional friend connections)
 - [ ] Habit streaks and reminders
 - [ ] Goal setting and tracking
-- [ ] Community challenges
-- [ ] Advanced analytics dashboard
-- [ ] Multi-language support
+- [ ] Advanced analytics dashboard & Export data (PDF reports)
 - [ ] Voice journaling
 
 ## 🐛 Troubleshooting
@@ -300,7 +292,7 @@ Uses OpenAI embeddings (1536 dimensions) to:
 - Restart development server after changes
 
 **Supabase Connection Error**
-- Verify `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+- Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - Check if RLS policies are properly configured
 
 **AI API Errors**
@@ -322,7 +314,7 @@ MIT License - feel free to use for personal or educational purposes.
 Built with ❤️ using:
 - Next.js and React team
 - Supabase team
-- OpenAI / Anthropic
+- OpenAI 
 - D3.js community
 - All open-source contributors
 
