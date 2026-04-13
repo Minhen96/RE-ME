@@ -12,7 +12,11 @@
       "Bash(nul)",
       "Bash(appauthcallbackroute.ts.tmp)",
       "Bash(del appauthcallbackroute.ts.tmp 2)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

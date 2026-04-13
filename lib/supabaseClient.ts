@@ -16,6 +16,9 @@ if (!supabaseKey) {
 
 // Create Supabase client for browser/frontend use
 export const supabase = createClient(supabaseUrl, supabaseKey, {
+  db: {
+    schema: 'reme_app',
+  },
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -32,6 +35,9 @@ export const getServiceRoleClient = () => {
   }
   
   return createClient(supabaseUrl, serviceRoleKey, {
+    db: {
+      schema: 'reme_app',
+    },
     auth: {
       persistSession: false,
       autoRefreshToken: false,

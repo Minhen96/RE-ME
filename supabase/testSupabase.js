@@ -20,7 +20,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 })
 
 async function testConnection() {
-  console.log("Testing connection and schema access in 'reme_app'...")
+  console.log("Testing connection and schema access...")
   
   // 1. Check Auth service
   const { data: { session }, error: authError } = await supabase.auth.getSession()
